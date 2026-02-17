@@ -1,0 +1,87 @@
+import java.net.*;
+import java.io.*;
+
+public class Server {
+
+    public static final int PORT = 4000;
+
+    public static void main(String[] args) {
+
+        ServerSocket serverSocket = null;
+        Socket socket = null;
+        BufferedReader in = null;
+        PrintWriter out = null;
+
+        try {
+            serverSocket = new ServerSocket(PORT);
+            System.out.println("Server started on port " + PORT);
+
+            socket = serverSocket.accept();
+            System.out.println("Client connected from " + socket.getInetAddress());
+
+            in = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream()));
+
+            out = new PrintWriter(socket.getOutputStream(), true);
+
+            String clientMessage = in.readLine();
+            System.out.println("Client says: " + clientMessage);
+
+            out.println("Hello from Server");
+
+        } catch (IOException e) {
+            System.out.println("Server Error: " + e.getMessage());
+        } finally {
+            try {
+                if (in != null) in.close();
+                if (out != null) out.close();
+                if (socket != null) socket.close();
+                if (serverSocket != null) serverSocket.close();
+            } catch (IOException e) {
+                System.out.println("Closing Error: " + e.getMessage());
+            }
+        }
+    }
+}
+import java.net.*;
+import java.io.*;
+
+public class Client {
+
+    public static void main(String[] args) {
+
+        Socket socket = null;
+        BufferedReader in = null;
+        PrintWriter out = null;
+
+        System.out.println("Trying to connect to server...");
+
+        try {
+            socket = new Socket(InetAddress.getLocalHost(), Server.PORT);
+
+            out = new PrintWriter(socket.getOutputStream(), true);
+            out.println("Hi from Client");
+
+            in = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream()));
+
+            String serverMessage = in.readLine();
+            System.out.println("Server says: " + serverMessage);
+
+        } catch (IOException e) {
+            System.out.println("Client Error: " + e.getMessage());
+        } finally {
+            try {
+                if (in != null) in.close();
+                if (out != null) out.close();
+                if (socket != null) socket.close();
+            } catch (IOException e) {
+                System.out.println("Closing Error: " + e.getMessage());
+            }
+        }
+    }
+}
+OUTPUT:
+Server started on port 4000
+Client connected from /127.0.0.1
+Client says: Hi from Client

@@ -1,0 +1,104 @@
+import java.io.*;
+import java.net.*;
+
+public class dnsclient {
+
+    public static void main(String args[]) throws IOException {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        DatagramSocket clientSocket = new DatagramSocket();
+
+        InetAddress ipaddress;
+
+        // If no argument given, use localhost
+        if (args.length == 0)
+            ipaddress = InetAddress.getLocalHost();
+        else
+            ipaddress = InetAddress.getByName(args[0]);
+
+        byte[] senddata = new byte[1024];
+        byte[] receivedata = new byte[1024];
+
+        int portaddr = 8080;
+
+        System.out.print("Enter the hostname : ");
+        String sentence = br.readLine();
+
+        senddata = sentence.getBytes();
+
+        // Send request packet
+        DatagramPacket pack = new DatagramPacket(senddata, senddata.length, ipaddress, portaddr);
+        clientSocket.send(pack);
+
+        // Receive response packet
+        DatagramPacket recvpack = new DatagramPacket(receivedata, receivedata.length);
+        clientSocket.receive(recvpack);
+
+        String modified = new String(recvpack.getData()).trim();
+        System.out.println("IP Address: " + modified);
+
+        clientSocket.close();
+    }
+}
+import java.io.*;
+import java.net.*;
+
+public class dnsserver {
+
+    // Function to find hostname index
+    private static int indexOf(String[] array, String str) {
+        str = str.trim();
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].equals(str))
+                return i;
+        }
+        return -1;
+    }
+
+    public static void main(String arg[]) throws IOException {
+
+        String[] hosts = { "yahoo.com", "gmail.com", "cricinfo.com", "facebook.com" };
+        String[] ip = { "68.180.206.184", "209.85.148.19", "80.168.92.140", "69.63.189.16" };
+
+        System.out.println("DNS Server Started... Press Ctrl + C to stop");
+
+        DatagramSocket serverSocket = new DatagramSocket(8080);
+
+        while (true) {
+
+            byte[] senddata = new byte[1024];
+            byte[] receivedata = new byte[1024];
+
+            DatagramPacket recvpack = new DatagramPacket(receivedata, receivedata.length);
+
+            // Receive request
+            serverSocket.receive(recvpack);
+
+            String sen = new String(recvpack.getData()).trim();
+
+            InetAddress ipaddress = recvpack.getAddress();
+            int port = recvpack.getPort();
+
+            System.out.println("Request for host: " + sen);
+
+            String capsent;
+
+            int index = indexOf(hosts, sen);
+
+            if (index != -1)
+                capsent = ip[index];
+            else
+                capsent = "Host Not Found";
+
+            senddata = capsent.getBytes();
+
+            // Send response
+            DatagramPacket pack = new DatagramPacket(senddata, senddata.length, ipaddress, port);
+            serverSocket.send(pack);
+        }
+    }
+}
+OUTPUT:
+Enter the hostname : gmail.com
+IP Address: 209.85.148.19

@@ -1,0 +1,118 @@
+import java.io.*;
+import java.net.*;
+
+class tcpchatserver {
+    public static void main(String args[]) {
+
+        PrintWriter toClient;
+        BufferedReader fromUser, fromClient;
+
+        try {
+            ServerSocket Srv = new ServerSocket(4000);
+            System.out.println("\nServer started");
+
+            Socket Clt = Srv.accept();
+            System.out.println("Client connected");
+
+            // Output stream to client
+            toClient = new PrintWriter(
+                    new BufferedWriter(
+                            new OutputStreamWriter(Clt.getOutputStream())), true);
+
+            // Input from client
+            fromClient = new BufferedReader(
+                    new InputStreamReader(Clt.getInputStream()));
+
+            // Input from user (keyboard)
+            fromUser = new BufferedReader(
+                    new InputStreamReader(System.in));
+
+            String CltMsg, SrvMsg;
+
+            while (true) {
+                CltMsg = fromClient.readLine();
+
+                if (CltMsg.equals("end"))
+                    break;
+
+                System.out.println("Client : " + CltMsg);
+
+                System.out.print("Message to Client : ");
+                SrvMsg = fromUser.readLine();
+
+                toClient.println(SrvMsg);
+            }
+
+            System.out.println("\nClient Disconnected");
+
+            fromClient.close();
+            toClient.close();
+            fromUser.close();
+            Clt.close();
+            Srv.close();
+
+        } catch (Exception E) {
+            System.out.println("Server Error: " + E.getMessage());
+        }
+    }
+}
+import java.io.*;
+import java.net.*;
+
+class tcpchatclient {
+    public static void main(String args[]) {
+
+        Socket Clt;
+        PrintWriter toServer;
+        BufferedReader fromUser, fromServer;
+
+        try {
+            Clt = new Socket(InetAddress.getLocalHost(), 4000);
+
+            // Output to server
+            toServer = new PrintWriter(
+                    new BufferedWriter(
+                            new OutputStreamWriter(Clt.getOutputStream())), true);
+
+            // Input from server
+            fromServer = new BufferedReader(
+                    new InputStreamReader(Clt.getInputStream()));
+
+            // Input from user
+            fromUser = new BufferedReader(
+                    new InputStreamReader(System.in));
+
+            String CltMsg, SrvMsg;
+
+            System.out.println("Type \"end\" to Quit");
+
+            while (true) {
+                System.out.print("Message to Server : ");
+                CltMsg = fromUser.readLine();
+
+                toServer.println(CltMsg);
+
+                if (CltMsg.equals("end"))
+                    break;
+
+                SrvMsg = fromServer.readLine();
+                System.out.println("Server : " + SrvMsg);
+            }
+
+            fromUser.close();
+            fromServer.close();
+            toServer.close();
+            Clt.close();
+
+        } catch (Exception E) {
+            System.out.println("Client Error: " + E.getMessage());
+        }
+    }
+}
+OUTPUT:
+Type "end" to Quit
+Message to Server : Hello
+Server : Hi client
+Message to Server : How are you?
+Server : I am fine
+Message to Server : end
