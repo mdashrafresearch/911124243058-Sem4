@@ -1,0 +1,7 @@
+Sky,AirTemp,Humidity,Wind,Month,Rains
+Cloudy,Cold,Normal,Normal,Jan,yes
+Cloudy,Cold,High,Normal,Dec,yes
+Cloudy,Cold,High,Strong,Dec,no
+Sunny,Warm,High,Strong,May,no
+Sunny,Warm,Normal,Normal,May,no
+Cloudy,Cold,Normal,Normal,May,no
