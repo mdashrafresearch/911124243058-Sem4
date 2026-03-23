@@ -1,0 +1,134 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_BLOCKS 50
+
+int memory[MAX_BLOCKS] = {0}; // 0 = free, 1 = allocated
+
+typedef struct {
+    int indexBlock;
+    int blocks[MAX_BLOCKS];
+    int blockCount;
+} IndexedFile;
+
+typedef struct {
+    int startBlock;
+    int blocks[MAX_BLOCKS];
+    int blockCount;
+} LinkedFile;
+
+void sequentialAllocation(int start, int size)
+{
+    int freeCount = 0;
+    for (int i = start; i < start + size; i++) {
+        if (memory[i] == 0) freeCount++;
+    }
+
+    if (freeCount == size) {
+        for (int i = start; i < start + size; i++) memory[i] = 1;
+        printf("File allocated from block %d to %d.\n", start, start + size - 1);
+    } else {
+        printf("Not enough contiguous free space available!\n");
+    }
+}
+
+void indexedAllocation(IndexedFile *file)
+{
+    printf("Enter index block: ");
+    scanf("%d", &file->indexBlock);
+
+    if (memory[file->indexBlock] == 1) {
+        printf("Index block already allocated!\n");
+        return;
+    }
+
+    printf("Enter number of blocks: ");
+    scanf("%d", &file->blockCount);
+
+    int count = 0;
+    for (int i = 0; i < MAX_BLOCKS && count < file->blockCount; i++) {
+        if (memory[i] == 0) {
+            file->blocks[count++] = i;
+            memory[i] = 1;
+        }
+    }
+
+    if (count < file->blockCount) {
+        printf("Not enough free blocks available!\n");
+    } else {
+        memory[file->indexBlock] = 1;
+        printf("File allocated with index block %d. Blocks: ", file->indexBlock);
+        for (int i = 0; i < file->blockCount; i++)
+            printf("%d ", file->blocks[i]);
+        printf("\n");
+    }
+}
+
+void linkedAllocation(LinkedFile *file)
+{
+    printf("Enter start block: ");
+    scanf("%d", &file->startBlock);
+
+    if (memory[file->startBlock] == 1) {
+        printf("Start block already allocated!\n");
+        return;
+    }
+
+    printf("Enter number of blocks: ");
+    scanf("%d", &file->blockCount);
+
+    int count = 0;
+    for (int i = 0; i < MAX_BLOCKS && count < file->blockCount; i++) {
+        if (memory[i] == 0) {
+            file->blocks[count++] = i;
+            memory[i] = 1;
+        }
+    }
+
+    if (count < file->blockCount) {
+        printf("Not enough free blocks available!\n");
+    } else {
+        memory[file->startBlock] = 1;
+        printf("File allocated starting from block %d. Blocks linked: ", file->startBlock);
+        for (int i = 0; i < file->blockCount; i++)
+            printf("%d -> ", file->blocks[i]);
+        printf("NULL\n");
+    }
+}
+
+int main()
+{
+    int choice, start, size;
+    IndexedFile indexedFile;
+    LinkedFile linkedFile;
+
+    while (1) {
+        printf("\nFile Allocation Strategies:\n");
+        printf("1. Sequential Allocation\n");
+        printf("2. Indexed Allocation\n");
+        printf("3. Linked Allocation\n");
+        printf("4. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter start block and size: ");
+                scanf("%d %d", &start, &size);
+                sequentialAllocation(start, size);
+                break;
+            case 2:
+                indexedAllocation(&indexedFile);
+                break;
+            case 3:
+                linkedAllocation(&linkedFile);
+                break;
+            case 4:
+                printf("Exiting program...\n");
+                return 0;
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }
+    return 0;
+}
